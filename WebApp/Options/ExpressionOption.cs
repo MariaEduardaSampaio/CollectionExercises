@@ -7,6 +7,6 @@ namespace WebApp.Options
         public const string Section = "ExpressionOption";
 
         [Required]
-        public Stack<char> Pilha { get; set; } = new Stack<char>();
+        public string Expressao { get; set; }
     }
 }

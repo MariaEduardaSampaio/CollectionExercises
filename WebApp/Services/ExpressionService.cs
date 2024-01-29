@@ -1,55 +1,54 @@
 ﻿using Microsoft.Extensions.Options;
+using System.Text.RegularExpressions;
 using WebApp.Options;
 
 namespace WebApp.Services
 {
     public class ExpressionService
     {
-        private Stack<char> _pilha { get; set; } = new();
+        private string _expressao { get; set; }
+        private static readonly Dictionary<char, char> _sinalDeAssociacao = new Dictionary<char, char>
+        {
+            { '(', ')' },
+            { '{', '}' },
+            { '[', ']' }
+        };
         public ExpressionService(IOptionsSnapshot<ExpressionOption> options)
         {
-            _pilha = options.Value.Pilha;
+            _expressao = options.Value.Expressao;
         }
 
         public bool ExpressaoEhBalanceada()
         {
             Stack<char> SinaisDeAssociacao = new();
+            _expressao = Regex.Replace(_expressao, @"[^\d+\-*/()\[\]{}]", "");
 
-            foreach (char caractere in _pilha)
+            foreach (char caractere in _expressao)
             {
                 if (EhSinalDeAbertura(caractere))
                     SinaisDeAssociacao.Push(caractere);
                 else if (EhSinalDeFechamento(caractere))
                 {
-                    if (SinaisDeAssociacao.Count == 0)
-                        return false;
-
-                    if (!SinaisCorrespondem(caractere))
+                    if (SinaisDeAssociacao.Count == 0 || !SinaisCorrespondem(SinaisDeAssociacao.Pop(), caractere))
                         return false;
                 }
-                else
-                    continue;
             }
-            return true;
+            return SinaisDeAssociacao.Count == 0;
         }
 
         private bool EhSinalDeAbertura(char caractere)
         {
-            return caractere == '(' || caractere == '[' || caractere == '{';
+            return _sinalDeAssociacao.ContainsKey(caractere);
         }
 
         private bool EhSinalDeFechamento(char caractere)
         {
-            return caractere == ')' || caractere == ']' || caractere == '}';
+            return _sinalDeAssociacao.ContainsValue(caractere);
         }
 
-        private bool SinaisCorrespondem(char sinalFechamento)
+        private bool SinaisCorrespondem(char sinalAbertura, char sinalFechamento)
         {
-            if ((_pilha.Contains('(') && sinalFechamento == ')')
-                || (_pilha.Contains('[') && sinalFechamento == ']')
-                || (_pilha.Contains('{') && sinalFechamento == '}'))
-                return true;
-            return false;
+            return _sinalDeAssociacao[sinalAbertura] == sinalFechamento;
         }
     }
 }
