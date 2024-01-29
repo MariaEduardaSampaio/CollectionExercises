@@ -7,6 +7,6 @@ namespace WebApp.Options
         public const string Section = "HotPotatoOption";
 
         [Required]
-        public Queue<string> Fila { get; set; } = new();
+        public int QuantidadeJogadores { get; set; }
     }
 }

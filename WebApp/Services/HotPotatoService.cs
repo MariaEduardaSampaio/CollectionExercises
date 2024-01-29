@@ -6,31 +6,38 @@ namespace WebApp.Services
 {
     public class HotPotatoService
     {
-        private Queue<string> _fila { get; set; } = new();
+        private int _quantidadeJogadores { get; set; }
         public HotPotatoService(IOptionsSnapshot<HotPotatoOption> options)
         {
-            _fila = options.Value.Fila;
+            _quantidadeJogadores = options.Value.QuantidadeJogadores;
         }
 
         public string JogarBatataQuente()
         {
             Random random = new();
             StringBuilder resultadoJogo = new StringBuilder();
-            string? pessoa = null;
+            Queue<int> jogadores = new Queue<int>();
 
-            while (_fila.Count > 0)
+            for(int i = 1; i <= _quantidadeJogadores; i++)
+                jogadores.Enqueue(i);
+
+
+            while (jogadores.Count > 1)
             {
-                int passes = random.Next(1, 30);
-                int indicePessoaPerdedora = passes % _fila.Count;
+                int passes = random.Next(1, 10);
 
-                for (int i = 0; i < indicePessoaPerdedora; i++)
+                for (int i = 1; i < passes; i++)
                 {
-                    pessoa = _fila.Dequeue();
-                    resultadoJogo.AppendLine($"Jogador {pessoa} perdeu!");
+                    int jogador = jogadores.Dequeue();
+                    jogadores.Enqueue(jogador);
                 }
+
+                int perdedorDaRodada = jogadores.Dequeue();
+                resultadoJogo.AppendLine($"O jogador {perdedorDaRodada} perdeu nesta rodada após {passes} passes!");
+                resultadoJogo.AppendLine($"Jogadores restantes: {string.Join(", ", jogadores)}");
             }
 
-            resultadoJogo.AppendLine($"O vencedor foi {pessoa}!");
+            resultadoJogo.AppendLine($"O vencedor foi o jogador {jogadores.Peek()}!");
             return resultadoJogo.ToString();
         }
     }
